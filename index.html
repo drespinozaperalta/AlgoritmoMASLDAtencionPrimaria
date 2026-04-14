@@ -156,6 +156,22 @@
       color:var(--muted);font-size:.85rem;margin-top:16px
     }
     .divider{height:1px;background:var(--line);margin:14px 0}
+  
+    .tooltip{
+      position:relative;display:inline-flex;align-items:center;justify-content:center;
+      width:18px;height:18px;border-radius:50%;background:#eef4ff;color:var(--blue);
+      font-size:.78rem;font-weight:900;cursor:help;margin-left:6px;border:1px solid #d7e5ff;
+    }
+    .tooltip .tip{
+      visibility:hidden;opacity:0;transition:opacity .18s ease, transform .18s ease;
+      position:absolute;left:50%;transform:translateX(-50%) translateY(6px);
+      bottom:125%;min-width:240px;max-width:320px;padding:10px 12px;border-radius:12px;
+      background:#0d1526;color:#eef4ff;font-size:.82rem;line-height:1.35;text-align:left;
+      box-shadow:0 10px 26px rgba(0,0,0,.24);z-index:100;border:1px solid rgba(255,255,255,.08)
+    }
+    .tooltip:hover .tip{visibility:visible;opacity:1;transform:translateX(-50%) translateY(0)}
+    .mini-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+
   </style>
 </head>
 <body>
@@ -209,7 +225,7 @@
         </div>
 
         <div class="divider"></div>
-        <h3>FIB-4</h3>
+        <h3>FIB-4 <span class="tooltip">?<span class="tip">Índice no invasivo calculado con edad, AST, ALT y plaquetas. Se usa como primer escalón para estratificar riesgo de fibrosis.</span></span></h3>
         <div class="subgrid">
           <div>
             <label>AST (U/L)</label>
@@ -233,11 +249,11 @@
             <input type="number" id="vcte" min="0" max="75" step="0.1" placeholder="Opcional">
           </div>
           <div>
-            <label>ELF</label>
+            <label>ELF <span class="tooltip">?<span class="tip">Enhanced Liver Fibrosis. Panel sérico que combina biomarcadores de matriz extracelular para estimar riesgo de fibrosis hepática avanzada.</span></span></label>
             <input type="number" id="elf" min="0" max="20" step="0.1" placeholder="Opcional">
           </div>
           <div>
-            <label>MRI-PDFF (%)</label>
+            <label>MRI-PDFF (%) <span class="tooltip">?<span class="tip">Magnetic Resonance Imaging Proton Density Fat Fraction. Método de resonancia que cuantifica grasa hepática con alta precisión y gran reproducibilidad.</span></span></label>
             <input type="number" id="pdff" min="0" max="100" step="0.1" placeholder="Opcional">
           </div>
         </div>
@@ -266,7 +282,7 @@
         <div class="actions">
           <button class="btn-primary" onclick="runAlgorithm()">Calcular algoritmo</button>
           <button class="btn-secondary" onclick="loadExampleLean()">Ejemplo IMC normal</button>
-          <button class="btn-ghost" onclick="resetForm()">Reiniciar</button>
+          <button class="btn-ghost" onclick="resetForm()">Borrar datos clínicos</button>
         </div>
       </section>
 
@@ -331,12 +347,23 @@
         <div id="safetyBox" class="flow">Las alertas aparecerán aquí.</div>
       </section>
 
+      <section class="card span-6">
+        <div class="section-head">
+          <h2>8. Contraindicaciones dinámicas</h2>
+          <span class="badge b-info">En tiempo real</span>
+        </div>
+        <div id="contraBox" class="flow">Se mostrarán según el fármaco sugerido.</div>
+      </section>
+
+
       <section class="card">
         <div class="section-head">
-          <h2>8. Informe exportable</h2>
+          <h2>9. Informe exportable</h2>
           <div class="actions" style="margin-top:0">
             <button class="btn-secondary" onclick="copyReport()">Copiar informe</button>
             <button class="btn-secondary" onclick="downloadReport()">Descargar .txt</button>
+            <button class="btn-secondary" onclick="copySOAP()">Copiar SOAP</button>
+            <button class="btn-secondary" onclick="copyNarrative()">Copiar narrativa</button>
             <button class="btn-secondary" onclick="window.print()">Imprimir / PDF</button>
           </div>
         </div>
@@ -514,6 +541,67 @@
       return {primary, alternatives, warnings, avoid, reasons};
     }
 
+
+    function buildContraindications(drugName, ctx){
+      const items = [];
+      if(drugName.toLowerCase().includes("tirzepatida") || drugName.toLowerCase().includes("semaglutida")){
+        items.push("Contraindicación relevante: MEN2 o antecedente personal/familiar de carcinoma medular tiroideo.");
+        if(ctx.pancreatitis) items.push("Precaución mayor: antecedente de pancreatitis.");
+        if(ctx.gerd) items.push("Precaución: puede empeorar síntomas gastrointestinales.");
+        if(ctx.stones) items.push("Vigilar enfermedad biliar y síntomas compatibles.");
+      } else if(drugName.toLowerCase().includes("resmetirom")){
+        items.push("Verificar elegibilidad hepática específica antes de uso.");
+        items.push("No usar como sustituto de evaluación hepatológica cuando hay fibrosis avanzada.");
+      } else if(drugName.toLowerCase().includes("topiramato")){
+        items.push("Precaución o evitar si hay nefrolitiasis.");
+        if(ctx.htn) items.push("Si se combina con fentermina, vigilar riesgo cardiovascular.");
+      } else if(drugName.toLowerCase().includes("naltrexona") || drugName.toLowerCase().includes("bupropión")){
+        items.push("Revisar perfil neuropsiquiátrico, convulsiones y presión arterial antes de indicar.");
+      } else if(drugName.toLowerCase().includes("orlistat")){
+        items.push("Vigilar tolerancia gastrointestinal y adherencia dietaria.");
+      } else {
+        items.push("Sin contraindicaciones automáticas específicas en esta versión. Validar caso por caso.");
+      }
+      return items;
+    }
+
+    function buildSOAP(reportData){
+      return [
+        "NOTA MÉDICA ESTRUCTURADA (SOAP)",
+        "==============================",
+        "S: Paciente en evaluación por riesgo cardiometabólico y/o sospecha de MASLD/MASH. Comorbilidades activas: " + (reportData.comorbidities.length ? reportData.comorbidities.join(", ") : "ninguna marcada") + ".",
+        "O: Edad " + reportData.age + " años; sexo " + reportData.sex + "; peso " + reportData.weight + " kg; talla " + reportData.height + " cm; IMC " + reportData.imc + " (" + reportData.imcClass + "). AST " + reportData.ast + ", ALT " + reportData.alt + ", plaquetas " + reportData.platelets + ". FIB-4 " + reportData.fib4 + " (" + reportData.fibRisk + "). " + reportData.secondLine,
+        "A: " + reportData.assessment,
+        "P: " + reportData.plan,
+        "",
+        "Aviso: Documento orientativo generado por algoritmo clínico. Requiere validación médica."
+      ].join("\n");
+    }
+
+    function buildNarrative(reportData){
+      return [
+        "NOTA MÉDICA NARRATIVA",
+        "=====================",
+        "Paciente " + reportData.sex.toLowerCase() + " de " + reportData.age + " años con peso de " + reportData.weight + " kg y talla de " + reportData.height + " cm, con IMC de " + reportData.imc + " (" + reportData.imcClass + "). En la estratificación inicial de fibrosis, el FIB-4 fue de " + reportData.fib4 + ", lo que corresponde a un riesgo " + reportData.fibRisk.toLowerCase() + ". " + reportData.secondSentence + " Presenta como fenotipos/comorbilidades relevantes: " + (reportData.comorbidities.length ? reportData.comorbidities.join(", ") : "ninguna marcada") + ".",
+        "Con estos datos, la interpretación clínica orientativa es la siguiente: " + reportData.assessment,
+        "Se sugiere el siguiente plan: " + reportData.plan,
+        "",
+        "Aviso: Documento orientativo generado por algoritmo clínico. Requiere validación médica."
+      ].join("\n");
+    }
+
+    function copySOAP(){
+      if(!window.reportData){ alert("Primero calcula el algoritmo."); return; }
+      const txt = buildSOAP(window.reportData);
+      navigator.clipboard.writeText(txt).then(()=>alert("SOAP copiado."));
+    }
+
+    function copyNarrative(){
+      if(!window.reportData){ alert("Primero calcula el algoritmo."); return; }
+      const txt = buildNarrative(window.reportData);
+      navigator.clipboard.writeText(txt).then(()=>alert("Nota narrativa copiada."));
+    }
+
     function runAlgorithm(){
       const age = num("age");
       const weight = num("weight");
@@ -648,6 +736,9 @@
       }
       document.getElementById("safetyBox").innerHTML = `<ul class="list-tight">` + safety.map(s=>`<li>${s}</li>`).join("") + `</ul>`;
 
+      const contraItems = buildContraindications(drug.primary.name, ctx);
+      document.getElementById("contraBox").innerHTML = `<ul class="list-tight">` + contraItems.map(s=>`<li>${s}</li>`).join("") + `</ul>`;
+
       const sex = document.getElementById("sex").value;
       const positives = [
         ["DM2 / insulinorresistencia", ctx.dm2],
@@ -707,6 +798,41 @@
         "AVISO",
         "Este informe es orientativo. Requiere integración con historia clínica, examen físico, otras etiologías hepáticas, disponibilidad local y juicio médico."
       ].filter(Boolean).join("\n");
+
+      const planText = [
+        fibCat.label === "Bajo" ? "Continuar intervención cardiometabólica, reforzar estilo de vida y repetir FIB-4 en seguimiento." :
+        fibCat.label === "Intermedio" ? "Solicitar elastografía o ELF para afinar riesgo y decidir referencia." :
+        "Referir a hepatología y completar evaluación de fibrosis avanzada.",
+        goals.type === "weight_loss" ? `Objetivo inicial de pérdida ponderal: ${goals.lowPct.toFixed(0)}-${goals.highPct.toFixed(0)}%.` :
+        goals.type === "normal_weight" ? "No indicar pérdida ponderal rutinaria; priorizar composición corporal, adiposidad visceral y riesgo metabólico." :
+        "No promover pérdida de peso.",
+        `Farmacoterapia orientativa: ${drug.primary.name}.`
+      ].join(" ");
+
+      const assessmentText = [
+        `Paciente con IMC ${fmt(imc,1)} (${bmiClass(imc)}) y FIB-4 ${fmt(fib4,2)} con riesgo ${fibCat.label.toLowerCase()} de fibrosis.`,
+        second ? `La segunda prueba sugiere: ${second.tier.toLowerCase()}.` : "No cuenta con segunda prueba de fibrosis al momento.",
+        imc < 25 ? "El algoritmo evita recomendar pérdida de peso rutinaria por tratarse de IMC normal." : "Existe un fenotipo con potencial beneficio de reducción ponderal clínica."
+      ].join(" ");
+
+      window.reportData = {
+        age: age,
+        sex: sex,
+        weight: fmt(weight,1),
+        height: fmt(height,1),
+        imc: fmt(imc,1),
+        imcClass: bmiClass(imc),
+        ast: fmt(ast,0),
+        alt: fmt(alt,0),
+        platelets: fmt(platelets,0),
+        fib4: fmt(fib4,2),
+        fibRisk: fibCat.label,
+        secondLine: second ? `${second.tier}${vcte!==null ? " | VCTE " + fmt(vcte,1) + " kPa" : ""}${elf!==null ? " | ELF " + fmt(elf,1) : ""}` : "Sin segunda prueba disponible.",
+        secondSentence: second ? `La segunda prueba disponible sugiere ${second.tier.toLowerCase()}.` : "No se dispone de segunda prueba al momento.",
+        comorbidities: positives,
+        assessment: assessmentText,
+        plan: planText
+      };
 
       document.getElementById("reportBox").textContent = report;
       window.currentReport = report;
@@ -768,5 +894,11 @@
 
     runAlgorithm();
   </script>
+
+<div style="text-align:center;margin-top:30px;font-size:0.85rem;color:#5d6b7b">
+<strong>Actualizado hasta el 13 de Abril 2026</strong><br>
+Búsqueda de la literatura, algoritmo, codificación y diseño de flujo por Diego Espinoza-Peralta
+</div>
 </body>
+
 </html>
