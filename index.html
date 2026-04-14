@@ -352,6 +352,10 @@
             <input type="number" id="weight" min="20" step="0.1" placeholder="Ej. 102" />
           </div>
           <div>
+            <label for="height">Talla (cm)</label>
+            <input type="number" id="height" min="100" max="250" step="0.1" placeholder="Ej. 168" />
+          </div>
+          <div>
             <label for="weightGoalPercent">Meta de pérdida (%)</label>
             <select id="weightGoalPercent">
               <option value="5">5%</option>
@@ -400,10 +404,10 @@
           <span class="badge info">Automático</span>
         </div>
         <div id="weightResult" class="result-box">
-          <div class="muted">Ingresa peso y elige porcentaje de meta para ver objetivo en kg.</div>
+          <div class="muted">Ingresa peso, talla y porcentaje para ver meta dinámica, IMC actual y pesos objetivo orientativos.</div>
         </div>
         <div class="note small">
-          Regla práctica: 5-10% mejora variables metabólicas iniciales; 10-15% suele dar beneficios más robustos en hígado, apnea y control glucémico; metas mayores pueden ser deseables en obesidad severa o MASH.
+          Regla práctica: 5-10% mejora variables metabólicas iniciales; 10-15% suele dar beneficios más robustos en hígado, apnea y control glucémico; metas mayores pueden ser deseables en obesidad severa o MASH. La talla permite calcular IMC y mostrar pesos objetivo orientativos.
         </div>
       </section>
 
@@ -443,7 +447,7 @@
       const weight = num('weight');
       const pct = parseFloat($('weightGoalPercent').value);
       if (!Number.isFinite(weight) || weight <= 0) {
-        weightBox.innerHTML = '<div class="muted">Ingresa peso y elige porcentaje de meta para ver objetivo en kg.</div>';
+        weightBox.innerHTML = '<div class="muted">Ingresa peso, talla y porcentaje para ver meta dinámica, IMC actual y pesos objetivo orientativos.</div>';
         return;
       }
       const loss = weight * (pct / 100);
