@@ -3,673 +3,770 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Algoritmo Interactivo MASLD/MASH + Obesidad</title>
+  <title>MASLD/MASH Navigator Pro</title>
   <style>
-    :root {
-      --bg: #f9f9fb;
-      --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --primary: #005AD2;
-      --primary-dark: #001965;
-      --accent: #6DC28D;
-      --warn: #EAAB00;
-      --danger: #E6553F;
-      --ok: #3F9C35;
-      --shadow: 0 10px 25px rgba(0,0,0,.06);
-      --radius: 18px;
+    :root{
+      --bg:#f6f8fc;
+      --panel:#ffffff;
+      --text:#112033;
+      --muted:#5d6b7b;
+      --line:#e3e8f0;
+      --blue:#005AD2;
+      --navy:#001965;
+      --sea:#6DC28D;
+      --sand:#D3B276;
+      --red:#E6553F;
+      --yellow:#EAAB00;
+      --green:#3F9C35;
+      --shadow:0 14px 40px rgba(0,25,101,.08);
+      --radius:22px;
     }
-
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: linear-gradient(180deg, #fbfbfd 0%, #f3f6fb 100%);
-      font-family: "Segoe UI", Arial, sans-serif;
-      color: var(--text);
-      line-height: 1.45;
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"Segoe UI", Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(0,90,210,.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(109,194,141,.10), transparent 26%),
+        linear-gradient(180deg, #fbfcff 0%, var(--bg) 100%);
+      line-height:1.45;
     }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 24px;
+    .wrap{max-width:1400px;margin:0 auto;padding:24px}
+    .hero{
+      background:linear-gradient(135deg, var(--navy), var(--blue));
+      color:#fff;
+      border-radius:30px;
+      padding:28px;
+      box-shadow:var(--shadow);
+      margin-bottom:20px;
+      position:relative;
+      overflow:hidden;
     }
-
-    .hero {
-      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-      color: white;
-      border-radius: 24px;
-      padding: 28px;
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
+    .hero:before,.hero:after{
+      content:"";
+      position:absolute;border-radius:50%;
+      background:rgba(255,255,255,.08);
+      filter:blur(2px);
     }
-
-    .hero h1 {
-      margin: 0 0 8px;
-      font-size: 2rem;
+    .hero:before{width:220px;height:220px;right:-60px;top:-60px}
+    .hero:after{width:150px;height:150px;right:160px;bottom:-70px}
+    .hero h1{margin:0 0 8px;font-size:2rem}
+    .hero p{margin:4px 0;color:rgba(255,255,255,.9)}
+    .hero-grid{display:grid;grid-template-columns:2fr 1fr;gap:18px;align-items:end}
+    @media(max-width:980px){.hero-grid{grid-template-columns:1fr}}
+    .hero-chip-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .chip{
+      padding:8px 12px;border-radius:999px;
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.18);
+      font-size:.88rem;font-weight:600
     }
-
-    .hero p {
-      margin: 6px 0;
-      opacity: 0.95;
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+    .card{
+      grid-column:span 12;
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:20px;
+      box-shadow:var(--shadow);
     }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: 18px;
+    .span-8{grid-column:span 8}
+    .span-6{grid-column:span 6}
+    .span-4{grid-column:span 4}
+    @media(max-width:980px){.span-8,.span-6,.span-4{grid-column:span 12}}
+    h2{margin:0 0 12px;color:var(--navy);font-size:1.22rem}
+    h3{margin:0 0 10px;color:var(--navy);font-size:1rem}
+    .muted{color:var(--muted)}
+    .tiny{font-size:.85rem}
+    .section-head{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px
     }
-
-    .card {
-      grid-column: span 12;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: var(--shadow);
+    .badge{
+      display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:999px;
+      font-size:.84rem;font-weight:700;border:1px solid transparent
     }
-
-    .span-6 { grid-column: span 6; }
-    .span-4 { grid-column: span 4; }
-    .span-8 { grid-column: span 8; }
-
-    @media (max-width: 900px) {
-      .span-6, .span-4, .span-8 { grid-column: span 12; }
+    .b-info{background:rgba(0,90,210,.08);color:var(--blue);border-color:rgba(0,90,210,.18)}
+    .b-low{background:rgba(63,156,53,.10);color:var(--green);border-color:rgba(63,156,53,.24)}
+    .b-mid{background:rgba(234,171,0,.13);color:#8b6500;border-color:rgba(234,171,0,.24)}
+    .b-high{background:rgba(230,85,63,.11);color:var(--red);border-color:rgba(230,85,63,.24)}
+    .b-lean{background:rgba(211,178,118,.16);color:#8a6232;border-color:rgba(211,178,118,.3)}
+    .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    @media(max-width:760px){.form-grid{grid-template-columns:1fr}}
+    label{display:block;font-size:.92rem;font-weight:700;margin-bottom:6px}
+    input[type=number],select{
+      width:100%;padding:12px 13px;border-radius:14px;border:1px solid #d6dde8;
+      background:#fff;font-size:.97rem;color:var(--text)
     }
-
-    h2 {
-      margin: 0 0 12px;
-      color: var(--primary-dark);
-      font-size: 1.25rem;
+    .subgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    @media(max-width:760px){.subgrid{grid-template-columns:1fr}}
+    .checks{
+      display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px
     }
-
-    h3 {
-      margin: 0 0 10px;
-      font-size: 1rem;
-      color: var(--primary-dark);
+    @media(max-width:760px){.checks{grid-template-columns:1fr}}
+    .check{
+      display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--line);
+      border-radius:16px;background:linear-gradient(180deg,#fff,#fbfcff)
     }
-
-    .muted { color: var(--muted); }
-    .small { font-size: .92rem; }
-
-    .section-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 12px;
+    .check input{margin-top:3px;transform:scale(1.12)}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+    button{
+      border:0;border-radius:14px;padding:12px 16px;font-size:.96rem;font-weight:800;cursor:pointer
     }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: .82rem;
-      font-weight: 600;
-      border: 1px solid transparent;
+    .btn-primary{background:linear-gradient(135deg,var(--blue),#2a79e4);color:#fff}
+    .btn-secondary{background:#eef4ff;color:var(--blue);border:1px solid #d7e5ff}
+    .btn-ghost{background:#fff;color:var(--navy);border:1px solid var(--line)}
+    .metric-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+    @media(max-width:980px){.metric-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:560px){.metric-row{grid-template-columns:1fr}}
+    .metric{
+      border:1px solid var(--line);border-radius:18px;padding:14px;background:linear-gradient(180deg,#fff,#fafcff)
     }
-
-    .badge.low { background: rgba(63,156,53,.12); color: var(--ok); border-color: rgba(63,156,53,.25); }
-    .badge.mid { background: rgba(234,171,0,.13); color: #9a6a00; border-color: rgba(234,171,0,.28); }
-    .badge.high { background: rgba(230,85,63,.12); color: var(--danger); border-color: rgba(230,85,63,.25); }
-    .badge.info { background: rgba(0,90,210,.10); color: var(--primary); border-color: rgba(0,90,210,.22); }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap: 14px;
+    .metric .label{font-size:.86rem;color:var(--muted);font-weight:700}
+    .metric .value{font-size:1.85rem;color:var(--navy);font-weight:900;margin-top:6px}
+    .flow{
+      border:1px dashed #c9d4e3;border-radius:18px;padding:14px;margin-top:12px;background:#fcfdff
     }
-
-    @media (max-width: 700px) {
-      .form-grid { grid-template-columns: 1fr; }
+    .callout{
+      border:1px solid var(--line);border-left:6px solid var(--blue);
+      border-radius:18px;padding:16px;background:linear-gradient(180deg,#fff,#fbfcff)
     }
-
-    label {
-      display: block;
-      font-size: .92rem;
-      font-weight: 600;
-      margin-bottom: 6px;
+    .callout.warn{border-left-color:var(--yellow)}
+    .callout.danger{border-left-color:var(--red)}
+    .callout.ok{border-left-color:var(--green)}
+    .list-tight{margin:8px 0 0 18px;padding:0}
+    .list-tight li{margin:4px 0}
+    .drug{
+      border:1px solid var(--line);border-radius:18px;padding:16px;background:linear-gradient(180deg,#fff,#fbfcff);margin-top:12px
     }
-
-    input[type="number"], input[type="text"], select {
-      width: 100%;
-      border: 1px solid #d7dbe3;
-      border-radius: 12px;
-      padding: 11px 12px;
-      font-size: .98rem;
-      background: #fff;
+    .drug-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+    .drug h4{margin:0;font-size:1.05rem;color:var(--navy)}
+    .pillars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    @media(max-width:760px){.pillars{grid-template-columns:1fr}}
+    .pill{
+      border:1px solid var(--line);border-radius:16px;padding:12px;background:#fff
     }
-
-    input[type="checkbox"] { transform: scale(1.15); }
-
-    .check-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap: 10px 14px;
-      margin-top: 8px;
+    .report{
+      white-space:pre-wrap;
+      font-family:Consolas, Monaco, monospace;
+      font-size:.9rem;
+      background:#0d1526;color:#e9f0ff;border-radius:18px;padding:16px;max-height:520px;overflow:auto
     }
-
-    @media (max-width: 700px) {
-      .check-grid { grid-template-columns: 1fr; }
+    .foot{
+      color:var(--muted);font-size:.85rem;margin-top:16px
     }
-
-    .check-item {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: #fcfcfe;
-    }
-
-    button {
-      background: var(--primary);
-      color: white;
-      border: 0;
-      border-radius: 12px;
-      padding: 12px 16px;
-      font-size: .98rem;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    button.secondary {
-      background: #eef4ff;
-      color: var(--primary);
-      border: 1px solid #d8e5ff;
-    }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 16px;
-    }
-
-    .result-box {
-      border: 1px solid var(--border);
-      border-left: 5px solid var(--primary);
-      background: #fbfdff;
-      border-radius: 16px;
-      padding: 16px;
-      margin-top: 14px;
-    }
-
-    .result-big {
-      font-size: 2rem;
-      font-weight: 800;
-      color: var(--primary-dark);
-      margin: 6px 0 4px;
-    }
-
-    .flow-step {
-      border: 1px dashed #cbd5e1;
-      border-radius: 14px;
-      padding: 12px 14px;
-      margin-top: 10px;
-      background: #fcfdff;
-    }
-
-    .drug-card {
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 14px;
-      margin-top: 12px;
-      background: linear-gradient(180deg, #fff, #fbfcff);
-    }
-
-    .drug-card h4 {
-      margin: 0 0 6px;
-      color: var(--primary-dark);
-      font-size: 1.02rem;
-    }
-
-    .pill-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin: 8px 0;
-    }
-
-    .pill {
-      font-size: .8rem;
-      padding: 5px 9px;
-      border-radius: 999px;
-      background: #eef4ff;
-      color: var(--primary);
-      border: 1px solid #d8e5ff;
-    }
-
-    .note {
-      background: #fff8e8;
-      border: 1px solid #f5df9e;
-      color: #6f5600;
-      border-radius: 14px;
-      padding: 12px 14px;
-      margin-top: 12px;
-    }
-
-    .danger-note {
-      background: #fff1ef;
-      border: 1px solid #f7c3bb;
-      color: #9a2f21;
-      border-radius: 14px;
-      padding: 12px 14px;
-      margin-top: 12px;
-    }
-
-    .footer {
-      margin-top: 22px;
-      font-size: .88rem;
-      color: var(--muted);
-    }
-
-    ul { padding-left: 18px; }
-    .hidden { display: none; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .divider{height:1px;background:var(--line);margin:14px 0}
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="wrap">
     <section class="hero">
-      <h1>🧠 Algoritmo Interactivo MASLD/MASH + Obesidad</h1>
-      <p>Herramienta clínica para triage de fibrosis con FIB-4, rutas dinámicas hacia elastografía y selección fenotípica de farmacoterapia antiobesidad.</p>
-      <p class="small">Uso educativo y de apoyo clínico. No sustituye juicio médico, guías locales ni valoración por hepatología/endocrinología.</p>
+      <div class="hero-grid">
+        <div>
+          <h1>MASLD/MASH Navigator Pro</h1>
+          <p>Algoritmo clínico interactivo para MASLD/MASH y obesidad con cálculo automático de FIB-4, rutas dinámicas de fibrosis, selección fenotípica de farmacoterapia y exportación de informe.</p>
+          <div class="hero-chip-row">
+            <span class="chip">FIB-4 automático</span>
+            <span class="chip">Elastografía dinámica</span>
+            <span class="chip">Fenotipos clínicos</span>
+            <span class="chip">Metas de peso inteligentes</span>
+            <span class="chip">Exportación para expediente</span>
+          </div>
+        </div>
+        <div class="callout">
+          <strong>Nota clínica</strong><br>
+          Esta herramienta apoya decisiones. No sustituye juicio médico, guías locales ni valoración individual.
+        </div>
+      </div>
     </section>
 
     <div class="grid">
-      <section class="card span-6">
-        <div class="section-title">
-          <h2>1) Datos para cálculo automático de FIB-4</h2>
-          <span class="badge info">Paso inicial</span>
-        </div>
-        <div class="form-grid">
-          <div>
-            <label for="age">Edad (años)</label>
-            <input type="number" id="age" min="18" max="100" placeholder="Ej. 52" />
-          </div>
-          <div>
-            <label for="ast">AST (U/L)</label>
-            <input type="number" id="ast" min="1" step="0.1" placeholder="Ej. 45" />
-          </div>
-          <div>
-            <label for="alt">ALT (U/L)</label>
-            <input type="number" id="alt" min="1" step="0.1" placeholder="Ej. 52" />
-          </div>
-          <div>
-            <label for="platelets">Plaquetas (10⁹/L)</label>
-            <input type="number" id="platelets" min="1" step="0.1" placeholder="Ej. 220" />
-          </div>
-        </div>
-
-        <div class="actions">
-          <button id="calcFib4">Calcular FIB-4 y ruta</button>
-          <button class="secondary" id="resetFib4">Limpiar</button>
-        </div>
-
-        <div id="fib4Result" class="result-box hidden"></div>
-      </section>
-
-      <section class="card span-6">
-        <div class="section-title">
-          <h2>2) Elastografía si el resultado fue intermedio o alto</h2>
-          <span class="badge info">Segundo escalón</span>
-        </div>
-        <div class="form-grid">
-          <div>
-            <label for="lsm">Rigidez hepática (kPa)</label>
-            <input type="number" id="lsm" min="0" step="0.1" placeholder="Ej. 7.8" />
-          </div>
-          <div>
-            <label for="method">Método</label>
-            <select id="method">
-              <option value="vcte">VCTE / FibroScan</option>
-              <option value="other">Otra elastografía</option>
-            </select>
-          </div>
-        </div>
-        <div class="actions">
-          <button id="calcElasto">Interpretar elastografía</button>
-        </div>
-        <div id="elastoResult" class="result-box hidden"></div>
-        <div class="note small">
-          Cortes prácticos usados aquí para VCTE: &lt;8 kPa bajo riesgo de fibrosis significativa, 8-12 kPa zona intermedia/F2-F3 probable, &gt;12 kPa alto riesgo de fibrosis avanzada/cirrosis probable. Interpretar en contexto clínico.
-        </div>
-      </section>
-
       <section class="card span-8">
-        <div class="section-title">
-          <h2>3) Fenotipos y comorbilidades para selección automática de fármaco</h2>
-          <span class="badge info">Precisión clínica</span>
+        <div class="section-head">
+          <h2>1. Datos clínicos</h2>
+          <span class="badge b-info">Entrada principal</span>
         </div>
-
-        <h3>Datos base</h3>
         <div class="form-grid">
           <div>
-            <label for="weight">Peso actual (kg)</label>
-            <input type="number" id="weight" min="20" step="0.1" placeholder="Ej. 102" />
+            <label>Edad (años)</label>
+            <input type="number" id="age" min="18" max="100" value="52">
           </div>
           <div>
-            <label for="height">Talla (cm)</label>
-            <input type="number" id="height" min="100" max="250" step="0.1" placeholder="Ej. 168" />
-          </div>
-          <div>
-            <label for="weightGoalPercent">Meta de pérdida (%)</label>
-            <select id="weightGoalPercent">
-              <option value="5">5%</option>
-              <option value="10">10%</option>
-              <option value="15" selected>15%</option>
-              <option value="20">20%</option>
-              <option value="25">25%</option>
+            <label>Sexo</label>
+            <select id="sex">
+              <option value="Mujer">Mujer</option>
+              <option value="Hombre">Hombre</option>
             </select>
           </div>
+          <div>
+            <label>Peso actual (kg)</label>
+            <input type="number" id="weight" min="25" max="350" step="0.1" value="98">
+          </div>
+          <div>
+            <label>Talla (cm)</label>
+            <input type="number" id="height" min="120" max="230" step="0.1" value="170">
+          </div>
         </div>
 
-        <h3 style="margin-top:16px;">Fenotipos / comorbilidades</h3>
-        <div class="check-grid">
-          <label class="check-item"><input type="checkbox" id="dm2"> <span><strong>DM2 / insulinorresistencia</strong><br><span class="muted small">Prioriza beneficio glucémico y cardiometabólico</span></span></label>
-          <label class="check-item"><input type="checkbox" id="cvd"> <span><strong>Enfermedad cardiovascular establecida</strong><br><span class="muted small">Busca beneficio CV y reducción de peso consistente</span></span></label>
-          <label class="check-item"><input type="checkbox" id="mashFibrosis"> <span><strong>MASLD/MASH con fibrosis significativa</strong><br><span class="muted small">Interesa pérdida de peso potente y/o terapia hepática específica</span></span></label>
-          <label class="check-item"><input type="checkbox" id="osa"> <span><strong>Apnea obstructiva del sueño</strong><br><span class="muted small">La magnitud de pérdida de peso importa mucho</span></span></label>
-          <label class="check-item"><input type="checkbox" id="hyperphagia"> <span><strong>Hiperfagia / hambre hedónica</strong><br><span class="muted small">Conviene efecto potente sobre apetito</span></span></label>
-          <label class="check-item"><input type="checkbox" id="gerd"> <span><strong>Reflujo o intolerancia GI marcada</strong><br><span class="muted small">Penaliza terapias muy gastrointestinales si la tolerancia es mala</span></span></label>
-          <label class="check-item"><input type="checkbox" id="depression"> <span><strong>Depresión / ansiedad</strong><br><span class="muted small">Revisar interacciones y apetito emocional</span></span></label>
-          <label class="check-item"><input type="checkbox" id="migraine"> <span><strong>Migraña</strong><br><span class="muted small">Topiramato puede jugar a favor</span></span></label>
-          <label class="check-item"><input type="checkbox" id="htnTachy"> <span><strong>HTA no controlada o taquicardia</strong><br><span class="muted small">Evita simpaticomiméticos</span></span></label>
-          <label class="check-item"><input type="checkbox" id="ckd"> <span><strong>ERC / albuminuria</strong><br><span class="muted small">Favorece agentes con beneficio cardio-renal-metabólico</span></span></label>
-          <label class="check-item"><input type="checkbox" id="stones"> <span><strong>Nefrolitiasis o antecedente de litiasis</strong><br><span class="muted small">Penaliza topiramato</span></span></label>
-          <label class="check-item"><input type="checkbox" id="pancreatitis"> <span><strong>Antecedente de pancreatitis o litiasis biliar</strong><br><span class="muted small">Usar incretinas con cautela clínica individualizada</span></span></label>
-          <label class="check-item"><input type="checkbox" id="maxLoss"> <span><strong>Necesidad de máxima pérdida de peso</strong><br><span class="muted small">Empuja hacia terapias de mayor eficacia ponderal</span></span></label>
+        <div class="divider"></div>
+        <h3>FIB-4</h3>
+        <div class="subgrid">
+          <div>
+            <label>AST (U/L)</label>
+            <input type="number" id="ast" min="1" max="1000" value="48">
+          </div>
+          <div>
+            <label>ALT (U/L)</label>
+            <input type="number" id="alt" min="1" max="1000" value="62">
+          </div>
+          <div>
+            <label>Plaquetas (10⁹/L)</label>
+            <input type="number" id="platelets" min="20" max="800" value="230">
+          </div>
         </div>
 
-        <h3 style="margin-top:16px;">Contraindicaciones/alertas importantes</h3>
-        <div class="check-grid">
-          <label class="check-item"><input type="checkbox" id="medullary"> <span><strong>MEN2 o carcinoma medular tiroideo</strong><br><span class="muted small">Evita GLP-1 / GIP-GLP-1</span></span></label>
-          <label class="check-item"><input type="checkbox" id="seizure"> <span><strong>Trastorno convulsivo</strong><br><span class="muted small">Evita bupropión/naltrexona</span></span></label>
-          <label class="check-item"><input type="checkbox" id="uncontrolledHTN"> <span><strong>HTA severa no controlada</strong><br><span class="muted small">Evita fentermina/topiramato y bupropión/naltrexona</span></span></label>
-          <label class="check-item"><input type="checkbox" id="cirrhosisDecomp"> <span><strong>Cirrosis descompensada / hepatopatía activa compleja</strong><br><span class="muted small">No candidato simple a algoritmo ambulatorio</span></span></label>
+        <div class="divider"></div>
+        <h3>Elastografía / segunda prueba</h3>
+        <div class="subgrid">
+          <div>
+            <label>VCTE / FibroScan (kPa)</label>
+            <input type="number" id="vcte" min="0" max="75" step="0.1" placeholder="Opcional">
+          </div>
+          <div>
+            <label>ELF</label>
+            <input type="number" id="elf" min="0" max="20" step="0.1" placeholder="Opcional">
+          </div>
+          <div>
+            <label>MRI-PDFF (%)</label>
+            <input type="number" id="pdff" min="0" max="100" step="0.1" placeholder="Opcional">
+          </div>
         </div>
-
-        <div class="actions">
-          <button id="calcPheno">Seleccionar fármaco por fenotipo</button>
-        </div>
-        <div id="phenoResult" class="result-box hidden"></div>
       </section>
 
       <section class="card span-4">
-        <div class="section-title">
-          <h2>4) Metas dinámicas de pérdida de peso</h2>
-          <span class="badge info">Automático</span>
+        <div class="section-head">
+          <h2>2. Comorbilidades / fenotipo</h2>
+          <span class="badge b-info">Motor terapéutico</span>
         </div>
-        <div id="weightResult" class="result-box">
-          <div class="muted">Ingresa peso, talla y porcentaje para ver meta dinámica, IMC actual y pesos objetivo orientativos.</div>
+        <div class="checks">
+          <label class="check"><input type="checkbox" id="dm2"><span><strong>DM2 / insulinorresistencia</strong><br><span class="muted tiny">Favorece incretinas</span></span></label>
+          <label class="check"><input type="checkbox" id="ascvd"><span><strong>ECV aterosclerótica / alto riesgo CV</strong><br><span class="muted tiny">Prioriza beneficio cardiometabólico</span></span></label>
+          <label class="check"><input type="checkbox" id="osa"><span><strong>Apnea obstructiva del sueño</strong><br><span class="muted tiny">Pérdida potente de peso</span></span></label>
+          <label class="check"><input type="checkbox" id="ckd"><span><strong>ERC / albuminuria</strong><br><span class="muted tiny">Importa protección cardio-renal</span></span></label>
+          <label class="check"><input type="checkbox" id="gerd"><span><strong>Reflujo / intolerancia GI</strong><br><span class="muted tiny">Revisar tolerancia digestiva</span></span></label>
+          <label class="check"><input type="checkbox" id="psych"><span><strong>Depresión / ansiedad</strong><br><span class="muted tiny">Vigilar impacto neuropsiquiátrico</span></span></label>
+          <label class="check"><input type="checkbox" id="migraine"><span><strong>Migraña</strong><br><span class="muted tiny">Puede favorecer topiramato en escenarios seleccionados</span></span></label>
+          <label class="check"><input type="checkbox" id="htn"><span><strong>HTA / taquicardia</strong><br><span class="muted tiny">Cuidado con simpaticomiméticos</span></span></label>
+          <label class="check"><input type="checkbox" id="stones"><span><strong>Nefrolitiasis o colelitiasis</strong><br><span class="muted tiny">Ajusta selección y vigilancia</span></span></label>
+          <label class="check"><input type="checkbox" id="pancreatitis"><span><strong>Antecedente de pancreatitis</strong><br><span class="muted tiny">Precaución con incretinas</span></span></label>
+          <label class="check"><input type="checkbox" id="medullary"><span><strong>MEN2 / Ca medular tiroideo</strong><br><span class="muted tiny">Contraindicación para GLP-1 RA</span></span></label>
+          <label class="check"><input type="checkbox" id="maxWeightLoss"><span><strong>Necesidad de máxima pérdida de peso</strong><br><span class="muted tiny">Cuando el objetivo de descenso es prioritario</span></span></label>
+          <label class="check"><input type="checkbox" id="abnormalLFT"><span><strong>PFH anormales / esteatosis conocida</strong><br><span class="muted tiny">Aumenta sospecha de MASLD</span></span></label>
         </div>
-        <div class="note small">
-          Regla práctica: 5-10% mejora variables metabólicas iniciales; 10-15% suele dar beneficios más robustos en hígado, apnea y control glucémico; metas mayores pueden ser deseables en obesidad severa o MASH. La talla permite calcular IMC y mostrar pesos objetivo orientativos.
+        <div class="actions">
+          <button class="btn-primary" onclick="runAlgorithm()">Calcular algoritmo</button>
+          <button class="btn-secondary" onclick="loadExampleLean()">Ejemplo IMC normal</button>
+          <button class="btn-ghost" onclick="resetForm()">Reiniciar</button>
         </div>
       </section>
 
-      <section class="card span-12">
-        <div class="section-title">
-          <h2>Resumen del flujo clínico</h2>
-          <span class="badge info">Mapa rápido</span>
+      <section class="card">
+        <div class="section-head">
+          <h2>3. Resultados clave</h2>
+          <span id="globalBadge" class="badge b-info">Esperando cálculo</span>
         </div>
-        <div class="flow-step"><strong>Entrada:</strong> adulto con obesidad, sobrepeso, DM2 o factores cardiometabólicos y sospecha de MASLD/MASH.</div>
-        <div class="flow-step"><strong>Paso 1:</strong> calcular <span class="mono">FIB-4 = edad × AST / (plaquetas × √ALT)</span>.</div>
-        <div class="flow-step"><strong>Si FIB-4 bajo:</strong> manejo metabólico, pérdida de peso, seguimiento periódico. No continuar escalada de fibrosis salvo alta sospecha clínica.</div>
-        <div class="flow-step"><strong>Si FIB-4 intermedio:</strong> pedir elastografía. Escalar según kPa y contexto.</div>
-        <div class="flow-step"><strong>Si FIB-4 alto:</strong> hepatología + elastografía y evaluación integral de daño hepático.</div>
-        <div class="flow-step"><strong>Después:</strong> usar fenotipos y comorbilidades para orientar farmacoterapia antiobesidad y definir meta ponderal.</div>
+        <div class="metric-row">
+          <div class="metric">
+            <div class="label">IMC</div>
+            <div class="value" id="imcValue">--</div>
+            <div class="muted tiny" id="imcClass">Sin calcular</div>
+          </div>
+          <div class="metric">
+            <div class="label">FIB-4</div>
+            <div class="value" id="fib4Value">--</div>
+            <div class="muted tiny" id="fib4Class">Sin calcular</div>
+          </div>
+          <div class="metric">
+            <div class="label">Riesgo fibrosis</div>
+            <div class="value" id="riskValue">--</div>
+            <div class="muted tiny" id="riskHint">Ruta pendiente</div>
+          </div>
+          <div class="metric">
+            <div class="label">Meta inicial</div>
+            <div class="value" id="targetValue">--</div>
+            <div class="muted tiny" id="targetHint">Pendiente</div>
+          </div>
+        </div>
       </section>
-    </div>
 
-    <div class="footer">
-      Basado en la estructura de tu documento fuente sobre MASLD/MASH, fibrosis, fenotipos y tratamiento farmacológico. Requiere validación clínica local antes de uso institucional.
+      <section class="card span-6">
+        <div class="section-head">
+          <h2>4. Ruta diagnóstica</h2>
+          <span class="badge b-info">Flujo dinámico</span>
+        </div>
+        <div id="diagnosticFlow" class="flow">Ingresa datos y calcula.</div>
+      </section>
+
+      <section class="card span-6">
+        <div class="section-head">
+          <h2>5. Objetivo de peso y conducta</h2>
+          <span class="badge b-info">Metas inteligentes</span>
+        </div>
+        <div id="weightPlan" class="flow">Se mostrará tras calcular.</div>
+      </section>
+
+      <section class="card span-6">
+        <div class="section-head">
+          <h2>6. Selección farmacológica</h2>
+          <span class="badge b-info">Fenotipo automático</span>
+        </div>
+        <div id="drugRecommendation">Sin recomendación todavía.</div>
+      </section>
+
+      <section class="card span-6">
+        <div class="section-head">
+          <h2>7. Seguridad y alertas</h2>
+          <span class="badge b-info">No todo lo brillante se receta</span>
+        </div>
+        <div id="safetyBox" class="flow">Las alertas aparecerán aquí.</div>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <h2>8. Informe exportable</h2>
+          <div class="actions" style="margin-top:0">
+            <button class="btn-secondary" onclick="copyReport()">Copiar informe</button>
+            <button class="btn-secondary" onclick="downloadReport()">Descargar .txt</button>
+            <button class="btn-secondary" onclick="window.print()">Imprimir / PDF</button>
+          </div>
+        </div>
+        <div id="reportBox" class="report">El informe aparecerá aquí.</div>
+        <div class="foot">
+          Sugerencia: úsalo como borrador clínico. Requiere verificación antes de integrarlo al expediente.
+        </div>
+      </section>
     </div>
   </div>
 
   <script>
-    const $ = (id) => document.getElementById(id);
+    function num(id){
+      const val = parseFloat(document.getElementById(id).value);
+      return isNaN(val) ? null : val;
+    }
+    function checked(id){ return document.getElementById(id).checked; }
+    function fmt(n, d=1){ return (n===null || isNaN(n)) ? "--" : Number(n).toFixed(d); }
+    function kg(n){ return (n===null || isNaN(n)) ? "--" : Number(n).toFixed(1) + " kg"; }
 
-    const fib4Box = $('fib4Result');
-    const elastoBox = $('elastoResult');
-    const phenoBox = $('phenoResult');
-    const weightBox = $('weightResult');
-
-    function num(id) {
-      const v = parseFloat($(id).value);
-      return Number.isFinite(v) ? v : null;
+    function fib4Category(age, fib4){
+      if(fib4 === null) return {label:"No calculable", cls:"b-info"};
+      // Umbrales simples y clínicamente prácticos
+      const lowCut = age >= 65 ? 2.0 : 1.3;
+      const highCut = age >= 65 ? 2.67 : 2.67;
+      if(fib4 < lowCut) return {label:"Bajo", cls:"b-low", lowCut, highCut};
+      if(fib4 <= highCut) return {label:"Intermedio", cls:"b-mid", lowCut, highCut};
+      return {label:"Alto", cls:"b-high", lowCut, highCut};
     }
 
-    function updateWeightGoal() {
-      const weight = num('weight');
-      const pct = parseFloat($('weightGoalPercent').value);
-      if (!Number.isFinite(weight) || weight <= 0) {
-        weightBox.innerHTML = '<div class="muted">Ingresa peso, talla y porcentaje para ver meta dinámica, IMC actual y pesos objetivo orientativos.</div>';
-        return;
-      }
-      const loss = weight * (pct / 100);
-      const target = weight - loss;
-      weightBox.innerHTML = `
-        <div class="badge info">Meta elegida: ${pct}%</div>
-        <div class="result-big">${target.toFixed(1)} kg</div>
-        <div><strong>Peso a perder:</strong> ${loss.toFixed(1)} kg</div>
-        <div class="small muted">Meta dinámica calculada a partir del peso actual.</div>
-      `;
+    function bmiClass(imc){
+      if(imc < 18.5) return "Bajo peso";
+      if(imc < 25) return "Normopeso";
+      if(imc < 30) return "Sobrepeso";
+      if(imc < 35) return "Obesidad grado I";
+      if(imc < 40) return "Obesidad grado II";
+      return "Obesidad grado III";
     }
 
-    $('weight').addEventListener('input', updateWeightGoal);
-    $('weightGoalPercent').addEventListener('change', updateWeightGoal);
-
-    $('calcFib4').addEventListener('click', () => {
-      const age = num('age');
-      const ast = num('ast');
-      const alt = num('alt');
-      const platelets = num('platelets');
-
-      if (![age, ast, alt, platelets].every(v => Number.isFinite(v) && v > 0)) {
-        fib4Box.classList.remove('hidden');
-        fib4Box.innerHTML = '<div class="danger-note">Completa edad, AST, ALT y plaquetas con valores válidos.</div>';
-        return;
+    function interpretSecondTest(vcte, elf){
+      if(vcte !== null){
+        if(vcte < 8) return {tier:"Baja probabilidad de fibrosis significativa", risk:"bajo"};
+        if(vcte <= 12) return {tier:"Probable fibrosis significativa / intermedia", risk:"intermedio"};
+        return {tier:"Alta probabilidad de fibrosis avanzada", risk:"alto"};
       }
-
-      const fib4 = (age * ast) / (platelets * Math.sqrt(alt));
-      let lowCut = age >= 65 ? 2.0 : 1.3;
-      let risk = '';
-      let badgeClass = '';
-      let route = '';
-
-      if (fib4 < lowCut) {
-        risk = 'Bajo riesgo';
-        badgeClass = 'low';
-        route = `
-          <div class="flow-step"><strong>Conducta:</strong> detener escalada de fibrosis en este punto, salvo alta sospecha clínica o discordancia marcada.</div>
-          <div class="flow-step"><strong>Siguiente paso:</strong> tratamiento intensivo de obesidad/comorbilidades, laboratorio hepático seriado y repetir FIB-4 en 1-3 años según riesgo metabólico.</div>
-        `;
-      } else if (fib4 <= 2.67) {
-        risk = 'Riesgo intermedio';
-        badgeClass = 'mid';
-        route = `
-          <div class="flow-step"><strong>Conducta:</strong> solicitar elastografía hepática.</div>
-          <div class="flow-step"><strong>Siguiente paso:</strong> si &lt;8 kPa, seguimiento; si 8-12 kPa, fibrosis significativa probable; si &gt;12 kPa, referir con prioridad.</div>
-        `;
-      } else {
-        risk = 'Alto riesgo';
-        badgeClass = 'high';
-        route = `
-          <div class="flow-step"><strong>Conducta:</strong> referir a hepatología y realizar elastografía / evaluación complementaria.</div>
-          <div class="flow-step"><strong>Siguiente paso:</strong> valorar fibrosis avanzada, cirrosis compensada, causas alternativas y necesidad de terapia hepática específica.</div>
-        `;
+      if(elf !== null){
+        if(elf < 9.8) return {tier:"Baja probabilidad de fibrosis avanzada", risk:"bajo"};
+        if(elf < 11.3) return {tier:"Zona intermedia", risk:"intermedio"};
+        return {tier:"Alta probabilidad de fibrosis avanzada", risk:"alto"};
       }
+      return null;
+    }
 
-      fib4Box.classList.remove('hidden');
-      fib4Box.innerHTML = `
-        <div class="badge ${badgeClass}">${risk}</div>
-        <div class="result-big">FIB-4: ${fib4.toFixed(2)}</div>
-        <div class="small muted">Punto de corte bajo usado: ${lowCut} ${age >= 65 ? '(ajustado por edad ≥65 años)' : ''}. Umbral alto práctico: 2.67.</div>
-        ${route}
-      `;
-    });
-
-    $('resetFib4').addEventListener('click', () => {
-      ['age','ast','alt','platelets','lsm'].forEach(id => $(id).value = '');
-      fib4Box.classList.add('hidden');
-      elastoBox.classList.add('hidden');
-    });
-
-    $('calcElasto').addEventListener('click', () => {
-      const lsm = num('lsm');
-      if (!Number.isFinite(lsm) || lsm <= 0) {
-        elastoBox.classList.remove('hidden');
-        elastoBox.innerHTML = '<div class="danger-note">Ingresa un valor válido de rigidez hepática en kPa.</div>';
-        return;
+    function computeWeightGoals(weight, imc, heightM){
+      const goals = {};
+      if(imc < 18.5){
+        goals.type = "no_weight_loss";
+        goals.primary = "No recomendar pérdida de peso";
+        goals.detail = "Priorizar estudio nutricional, composición corporal y causas metabólicas/hepáticas.";
+        return goals;
       }
-
-      let cls = 'low', label = 'Bajo riesgo', message = '';
-      if (lsm < 8) {
-        cls = 'low';
-        label = 'Bajo riesgo por elastografía';
-        message = 'Probabilidad baja de fibrosis significativa. Mantener manejo metabólico y seguimiento.';
-      } else if (lsm <= 12) {
-        cls = 'mid';
-        label = 'Riesgo intermedio';
-        message = 'Fibrosis significativa probable. Considerar referencia o evaluación especializada según contexto, laboratorio y comorbilidades.';
-      } else {
-        cls = 'high';
-        label = 'Alto riesgo';
-        message = 'Fibrosis avanzada/cirrosis probable. Referir a hepatología y completar estadificación.';
+      if(imc < 25){
+        goals.type = "normal_weight";
+        goals.primary = "No recomendar pérdida ponderal rutinaria";
+        goals.detail = "Si existe MASLD con IMC normal, enfocar en calidad dietaria, ejercicio, adiposidad visceral, resistencia a la insulina, sarcopenia y factores cardiometabólicos. Se puede considerar un descenso modesto solo si hay exceso adiposo visceral documentado o ganancia reciente.";
+        goals.optional5 = weight * 0.95;
+        return goals;
       }
+      let lowPct = 0.05, highPct = 0.10;
+      if(imc >= 30 && imc < 35){ lowPct = 0.07; highPct = 0.12; }
+      if(imc >= 35){ lowPct = 0.10; highPct = 0.15; }
+      goals.type = "weight_loss";
+      goals.lowPct = lowPct * 100;
+      goals.highPct = highPct * 100;
+      goals.lowWeight = weight * (1 - lowPct);
+      goals.highWeight = weight * (1 - highPct);
+      const target249 = 24.9 * (heightM ** 2);
+      goals.target249 = target249;
+      goals.outOfObesity = imc >= 30 ? 29.9 * (heightM ** 2) : null;
+      return goals;
+    }
 
-      elastoBox.classList.remove('hidden');
-      elastoBox.innerHTML = `
-        <div class="badge ${cls}">${label}</div>
-        <div class="result-big">${lsm.toFixed(1)} kPa</div>
-        <div>${message}</div>
-      `;
-    });
-
-    function isChecked(id) { return $(id).checked; }
-
-    $('calcPheno').addEventListener('click', () => {
-      updateWeightGoal();
+    function recommendDrug(ctx){
       const warnings = [];
-      const score = {
-        tirzepatide: 0,
-        semaglutide: 0,
-        resmetirom: 0,
-        phentop: 0,
-        nb: 0,
-        orlistat: 0
+      const reasons = [];
+      let primary = null;
+      let alternatives = [];
+      let avoid = [];
+
+      const glpContra = ctx.medullary;
+      const incretinPrecaution = ctx.pancreatitis;
+
+      if(glpContra){
+        warnings.push("MEN2 o antecedente de carcinoma medular tiroideo: evitar agonistas GLP-1 y agentes relacionados.");
+        avoid.push("Semaglutida");
+        avoid.push("Tirzepatida");
+      }
+      if(incretinPrecaution){
+        warnings.push("Antecedente de pancreatitis: usar incretinas con mucha cautela o evitar según contexto clínico.");
+      }
+      if(ctx.htn){
+        warnings.push("HTA o taquicardia: cuidado con fentermina/topiramato y otras opciones simpaticomiméticas.");
+      }
+      if(ctx.stones){
+        warnings.push("Nefrolitiasis o colelitiasis: revisar riesgo con topiramato y vigilar enfermedad biliar si se usan incretinas.");
+      }
+      if(ctx.gerd){
+        warnings.push("Reflujo o GI sensible: considerar que incretinas pueden empeorar náusea, vómito o plenitud.");
+      }
+      if(ctx.psych){
+        warnings.push("Depresión/ansiedad: si se valora naltrexona/bupropión, revisar perfil psiquiátrico y riesgo individual.");
+      }
+
+      const obesityCandidate = ctx.imc >= 27 || (ctx.imc >= 25 && (ctx.dm2 || ctx.ascvd || ctx.osa || ctx.ckd));
+      const leanMasld = ctx.imc < 25 && (ctx.abnormalLFT || ctx.secondRisk !== null || ctx.fibRisk !== "Bajo");
+
+      if(ctx.imc < 25){
+        if(leanMasld){
+          primary = {
+            name: "No priorizar farmacoterapia antiobesidad de rutina",
+            why: "IMC normal. En MASLD lean, la meta no es bajar peso por inercia, sino corregir disfunción metabólica, adiposidad visceral, actividad física, calidad dietaria y riesgo hepático."
+          };
+          if((ctx.dm2 || ctx.ascvd || ctx.ckd) && !glpContra && !incretinPrecaution){
+            alternatives.push("Si además hay DM2 o alto riesgo cardiometabólico, considerar incretinas por beneficio metabólico más que por objetivo de peso.");
+            reasons.push("Fenotipo lean metabólicamente enfermo.");
+          }
+          if(ctx.secondRisk === "alto" || ctx.fibRisk === "Alto"){
+            alternatives.push("Valorar hepatología y, si hay fibrosis significativa no cirrótica confirmada, considerar terapia hepática específica como resmetirom según elegibilidad.");
+          }
+        } else {
+          primary = {
+            name: "Sin indicación de pérdida de peso",
+            why: "IMC normal y sin señal fuerte de exceso adiposo clínicamente relevante. Priorizar vigilancia metabólica y hepática si aplica."
+          };
+        }
+      } else if(obesityCandidate){
+        if(!glpContra && !incretinPrecaution && (ctx.maxWeightLoss || ctx.osa || ctx.dm2 || ctx.ascvd || ctx.ckd)){
+          primary = {
+            name: "Tirzepatida",
+            why: "Favorecida cuando se busca máxima pérdida de peso o hay fenotipo cardiometabólico con DM2, OSA, ERC o alto riesgo CV."
+          };
+          reasons.push("Mayor potencia para pérdida ponderal.");
+          if(ctx.dm2) reasons.push("Útil en DM2 / insulinorresistencia.");
+          if(ctx.osa) reasons.push("El fenotipo con apnea suele beneficiarse de pérdidas de peso más potentes.");
+        } else if(!glpContra && !incretinPrecaution){
+          primary = {
+            name: "Semaglutida 2.4 mg",
+            why: "Opción sólida para obesidad con fenotipo cardiometabólico, especialmente cuando se priorizan beneficios metabólicos y hepáticos junto con pérdida de peso."
+          };
+          reasons.push("Beneficio cardiometabólico robusto.");
+        } else {
+          primary = {
+            name: "Considerar opción no incretínica individualizada",
+            why: "Las incretinas no son la primera opción aquí por contraindicaciones o precauciones mayores."
+          };
+          if(ctx.migraine && !ctx.stones && !ctx.htn){
+            alternatives.push("Topiramato/fentermina podría explorarse en escenarios seleccionados, con vigilancia neurológica y cardiovascular.");
+          }
+          alternatives.push("Orlistat puede considerarse si se busca una alternativa sin incretinas, con menor potencia.");
+          if(!ctx.psych && !ctx.htn){
+            alternatives.push("Naltrexona/bupropión puede ser opción si el perfil neuropsiquiátrico y cardiovascular lo permite.");
+          }
+        }
+
+        if((ctx.fibRisk === "Alto" || ctx.secondRisk === "alto") && !ctx.decompensated){
+          alternatives.push("Si existe MASH con fibrosis moderada-avanzada no cirrótica y elegibilidad adecuada, valorar terapia hepática específica como resmetirom.");
+        }
+      } else {
+        primary = {
+          name: "Priorizar intervención intensiva no farmacológica",
+          why: "Con este IMC y este patrón de comorbilidades, la indicación de fármaco antiobesidad no es automática."
+        };
+      }
+
+      return {primary, alternatives, warnings, avoid, reasons};
+    }
+
+    function runAlgorithm(){
+      const age = num("age");
+      const weight = num("weight");
+      const height = num("height");
+      const ast = num("ast");
+      const alt = num("alt");
+      const platelets = num("platelets");
+      const vcte = num("vcte");
+      const elf = num("elf");
+      const pdff = num("pdff");
+
+      if(!age || !weight || !height || !ast || !alt || !platelets){
+        alert("Completa edad, peso, talla, AST, ALT y plaquetas.");
+        return;
+      }
+
+      const hM = height / 100;
+      const imc = weight / (hM*hM);
+      const fib4 = (age * ast) / (platelets * Math.sqrt(alt));
+      const fibCat = fib4Category(age, fib4);
+      const second = interpretSecondTest(vcte, elf);
+
+      const ctx = {
+        imc, fibRisk:fibCat.label, secondRisk: second ? second.risk : null,
+        dm2:checked("dm2"), ascvd:checked("ascvd"), osa:checked("osa"), ckd:checked("ckd"),
+        gerd:checked("gerd"), psych:checked("psych"), migraine:checked("migraine"),
+        htn:checked("htn"), stones:checked("stones"), pancreatitis:checked("pancreatitis"),
+        medullary:checked("medullary"), maxWeightLoss:checked("maxWeightLoss"),
+        abnormalLFT:checked("abnormalLFT"), decompensated:false
       };
 
-      if (isChecked('dm2')) { score.tirzepatide += 3; score.semaglutide += 3; }
-      if (isChecked('cvd')) { score.semaglutide += 3; score.tirzepatide += 2; }
-      if (isChecked('mashFibrosis')) { score.resmetirom += 4; score.tirzepatide += 2; score.semaglutide += 2; }
-      if (isChecked('osa')) { score.tirzepatide += 3; score.semaglutide += 2; }
-      if (isChecked('hyperphagia')) { score.tirzepatide += 2; score.semaglutide += 2; score.nb += 1; }
-      if (isChecked('gerd')) { score.orlistat -= 1; score.tirzepatide -= 1; score.semaglutide -= 1; }
-      if (isChecked('depression')) { score.nb += 1; }
-      if (isChecked('migraine')) { score.phentop += 2; }
-      if (isChecked('htnTachy')) { score.phentop -= 4; score.nb -= 2; }
-      if (isChecked('ckd')) { score.tirzepatide += 2; score.semaglutide += 2; }
-      if (isChecked('stones')) { score.phentop -= 3; }
-      if (isChecked('pancreatitis')) { score.tirzepatide -= 2; score.semaglutide -= 2; }
-      if (isChecked('maxLoss')) { score.tirzepatide += 3; score.semaglutide += 2; score.phentop += 1; }
+      const goals = computeWeightGoals(weight, imc, hM);
+      const drug = recommendDrug(ctx);
 
-      if (isChecked('medullary')) { score.tirzepatide -= 100; score.semaglutide -= 100; warnings.push('MEN2 o carcinoma medular tiroideo: evitar GLP-1 y dual GIP/GLP-1.'); }
-      if (isChecked('seizure')) { score.nb -= 100; warnings.push('Trastorno convulsivo: evitar naltrexona/bupropión.'); }
-      if (isChecked('uncontrolledHTN')) { score.phentop -= 100; score.nb -= 100; warnings.push('HTA severa no controlada: evitar simpaticomiméticos y bupropión/naltrexona.'); }
-      if (isChecked('cirrhosisDecomp')) { score.resmetirom -= 100; warnings.push('Cirrosis descompensada/hepatopatía compleja: este algoritmo no sustituye valoración especializada.'); }
+      document.getElementById("imcValue").textContent = fmt(imc,1);
+      document.getElementById("imcClass").textContent = bmiClass(imc);
 
-      const meds = [
-        {
-          key: 'tirzepatide',
-          title: 'Tirzepatida',
-          why: 'Muy potente para pérdida de peso. Muy atractiva si buscas máxima reducción ponderal, DM2, apnea del sueño o perfil cardiometabólico amplio.',
-          tags: ['Mayor potencia ponderal', 'DM2', 'OSA', 'Perfil metabólico'],
-          cautions: 'Precaución clínica si antecedente de pancreatitis o litiasis biliar. Evitar si MEN2/carcinoma medular tiroideo.'
-        },
-        {
-          key: 'semaglutide',
-          title: 'Semaglutida 2.4 mg',
-          why: 'Excelente opción si predominan DM2, riesgo cardiovascular, necesidad de pérdida de peso robusta o MASLD/MASH con enfoque cardiometabólico.',
-          tags: ['CV', 'DM2', 'Pérdida de peso', 'MASLD/MASH'],
-          cautions: 'Precaución clínica si antecedente de pancreatitis o litiasis biliar. Evitar si MEN2/carcinoma medular tiroideo.'
-        },
-        {
-          key: 'resmetirom',
-          title: 'Resmetirom',
-          why: 'Terapia hepática específica para MASH no cirrótica con fibrosis moderada-avanzada; no es fármaco principal de pérdida de peso.',
-          tags: ['MASH F2-F3', 'Terapia hepática', 'Complementario'],
-          cautions: 'No usar como “atajo” si el principal problema es obesidad sin estadificación hepática. Requiere selección adecuada.'
-        },
-        {
-          key: 'phentop',
-          title: 'Fentermina/Topiramato',
-          why: 'Puede ser útil cuando buscas buena potencia ponderal y existe migraña, pero pierde puntos con HTA, taquicardia o litiasis.',
-          tags: ['Pérdida de peso', 'Migraña'],
-          cautions: 'Evitar si HTA severa, taquicardia relevante o nefrolitiasis.'
-        },
-        {
-          key: 'nb',
-          title: 'Naltrexona/Bupropión',
-          why: 'A veces encaja cuando predomina apetito/ansiedad por comida, pero pesa menos si hay HTA o riesgo convulsivo.',
-          tags: ['Control de apetito', 'Fenotipo conductual'],
-          cautions: 'Evitar en convulsiones y HTA no controlada.'
-        },
-        {
-          key: 'orlistat',
-          title: 'Orlistat',
-          why: 'Opción menos potente; puede servir cuando otras alternativas no son candidatas o no están disponibles.',
-          tags: ['Alternativa', 'Sin eje central hepático'],
-          cautions: 'Molestias gastrointestinales frecuentes y menor eficacia ponderal.'
+      document.getElementById("fib4Value").textContent = fmt(fib4,2);
+      document.getElementById("fib4Class").textContent = `Umbrales usados: bajo < ${fibCat.lowCut ?? "--"} | alto > ${fibCat.highCut ?? "--"}`;
+
+      document.getElementById("riskValue").textContent = fibCat.label;
+      document.getElementById("riskHint").textContent = second ? second.tier : "Sin segunda prueba";
+
+      const badge = document.getElementById("globalBadge");
+      badge.className = "badge " + fibCat.cls;
+      badge.textContent = `Riesgo ${fibCat.label}`;
+
+      let diag = `<strong>Paso 1.</strong> IMC ${fmt(imc,1)} (${bmiClass(imc)}). FIB-4 ${fmt(fib4,2)} → <strong>${fibCat.label}</strong>.`;
+      if(fibCat.label === "Bajo"){
+        diag += `<div class="flow"><strong>Ruta sugerida:</strong> Si no hay señales de alarma, continuar manejo cardiometabólico, optimizar estilo de vida y repetir FIB-4 periódicamente.`;
+        if(vcte !== null || elf !== null){
+          diag += ` Ya existe segunda prueba: <strong>${second.tier}</strong>.`;
+        } else {
+          diag += ` No se requiere elastografía inmediata en la mayoría de escenarios estables.`;
         }
-      ];
-
-      const ranked = meds
-        .map(m => ({...m, pts: score[m.key]}))
-        .sort((a,b) => b.pts - a.pts);
-
-      const top = ranked[0];
-      const second = ranked[1];
-      const third = ranked[2];
-
-      let summary = '';
-      if (top.key === 'resmetirom' && (isChecked('mashFibrosis'))) {
-        summary = 'El fenotipo empuja a terapia hepática específica, pero en la práctica suele combinarse con una estrategia agresiva de pérdida de peso si también hay obesidad clínicamente relevante.';
-      } else if (top.key === 'tirzepatide') {
-        summary = 'El perfil del paciente grita pérdida de peso potente con beneficio metabólico amplio.';
-      } else if (top.key === 'semaglutide') {
-        summary = 'Aquí pesa mucho el eje cardiometabólico con una opción sólida y versátil.';
+        diag += `</div>`;
+      } else if(fibCat.label === "Intermedio"){
+        diag += `<div class="flow"><strong>Ruta sugerida:</strong> Realizar elastografía o ELF.`;
+        if(second){
+          diag += ` Resultado secundario: <strong>${second.tier}</strong>.`;
+          if(second.risk === "alto"){
+            diag += ` Considerar referencia a hepatología.`;
+          }
+        } else {
+          diag += ` Aún falta segunda prueba para afinar el riesgo.`;
+        }
+        diag += `</div>`;
       } else {
-        summary = 'El algoritmo detectó restricciones que desplazan a las incretinas o favorecen una alternativa más específica.';
+        diag += `<div class="flow"><strong>Ruta sugerida:</strong> Riesgo alto de fibrosis avanzada.`;
+        if(second){
+          diag += ` Segunda prueba: <strong>${second.tier}</strong>.`;
+        }
+        diag += ` Referir a hepatología, completar evaluación etiológica y definir elegibilidad a terapias específicas.</div>`;
       }
 
-      const renderCard = (drug, label) => `
-        <div class="drug-card">
-          <div class="badge info">${label}</div>
-          <h4>${drug.title}</h4>
-          <div class="pill-row">${drug.tags.map(t => `<span class="pill">${t}</span>`).join('')}</div>
-          <div><strong>Puntaje relativo:</strong> ${drug.pts}</div>
-          <div style="margin-top:6px;">${drug.why}</div>
-          <div class="small muted" style="margin-top:8px;">${drug.cautions}</div>
-        </div>
-      `;
+      if(pdff !== null){
+        diag += `<div class="flow"><strong>MRI-PDFF:</strong> ${fmt(pdff,1)}%. Útil para cuantificación de esteatosis, pero no reemplaza la estratificación de fibrosis.</div>`;
+      }
 
-      phenoBox.classList.remove('hidden');
-      phenoBox.innerHTML = `
-        <div class="badge info">Selección automática por fenotipo</div>
-        <div class="result-big">${top.title}</div>
-        <div>${summary}</div>
-        ${renderCard(top, 'Primera opción sugerida')}
-        ${renderCard(second, 'Segunda opción')}
-        ${renderCard(third, 'Tercera opción')}
-        ${warnings.length ? `<div class="danger-note"><strong>Alertas:</strong><ul>${warnings.map(w => `<li>${w}</li>`).join('')}</ul></div>` : ''}
-        <div class="note"><strong>Punto fino clínico:</strong> si hay MASH con fibrosis significativa, la pérdida de peso sigue siendo columna vertebral aunque se contemple resmetirom como terapia específica.</div>
-      `;
-    });
+      document.getElementById("diagnosticFlow").innerHTML = diag;
+
+      let weightHtml = "";
+      if(goals.type === "no_weight_loss"){
+        weightHtml = `<div class="callout danger"><strong>No promover pérdida de peso.</strong><br>${goals.detail}</div>`;
+        document.getElementById("targetValue").textContent = "No bajar";
+        document.getElementById("targetHint").textContent = "Enfoque nutricional";
+      } else if(goals.type === "normal_weight"){
+        weightHtml = `<div class="callout warn"><strong>IMC normal: no empujar pérdida ponderal por reflejo.</strong><br>${goals.detail}</div>
+        <div class="flow"><strong>Objetivos preferentes:</strong>
+          <ul class="list-tight">
+            <li>Reducir adiposidad visceral si existe.</li>
+            <li>Mejorar fuerza y preservar masa magra.</li>
+            <li>Optimizar dieta, actividad física, sueño y resistencia a la insulina.</li>
+            <li>Tratar comorbilidades y monitorizar fibrosis.</li>
+          </ul>
+        </div>`;
+        document.getElementById("targetValue").textContent = "No rutina";
+        document.getElementById("targetHint").textContent = "Peso normal";
+      } else {
+        weightHtml = `<div class="callout ok"><strong>Meta inicial sugerida:</strong> pérdida de ${goals.lowPct.toFixed(0)} a ${goals.highPct.toFixed(0)}% del peso actual.</div>
+        <div class="pillars">
+          <div class="pill"><strong>Peso meta inicial</strong><br>${kg(goals.lowWeight)} a ${kg(goals.highWeight)}</div>
+          <div class="pill"><strong>Pérdida absoluta</strong><br>${kg(weight - goals.lowWeight)} a ${kg(weight - goals.highWeight)}</div>
+          ${goals.outOfObesity ? `<div class="pill"><strong>Peso aproximado para IMC 29.9</strong><br>${kg(goals.outOfObesity)}</div>` : ""}
+          <div class="pill"><strong>Referencia IMC 24.9</strong><br>${kg(goals.target249)}</div>
+        </div>`;
+        document.getElementById("targetValue").textContent = `${goals.lowPct.toFixed(0)}-${goals.highPct.toFixed(0)}%`;
+        document.getElementById("targetHint").textContent = `${kg(goals.lowWeight)} a ${kg(goals.highWeight)}`;
+      }
+      document.getElementById("weightPlan").innerHTML = weightHtml;
+
+      let drugHtml = `<div class="drug"><div class="drug-top"><div><h4>${drug.primary.name}</h4><div class="muted">${drug.primary.why}</div></div></div>`;
+      if(drug.reasons.length){
+        drugHtml += `<ul class="list-tight">` + drug.reasons.map(r=>`<li>${r}</li>`).join("") + `</ul>`;
+      }
+      if(drug.alternatives.length){
+        drugHtml += `<div class="divider"></div><strong>Alternativas / matices</strong><ul class="list-tight">` + drug.alternatives.map(a=>`<li>${a}</li>`).join("") + `</ul>`;
+      }
+      drugHtml += `</div>`;
+      document.getElementById("drugRecommendation").innerHTML = drugHtml;
+
+      let safety = [];
+      if(drug.warnings.length) safety = safety.concat(drug.warnings);
+      if(fibCat.label === "Alto" || (second && second.risk === "alto")){
+        safety.push("Riesgo elevado de fibrosis avanzada: no retrasar referencia a hepatología si el contexto clínico lo confirma.");
+      }
+      if(imc < 25){
+        safety.push("Con IMC normal, una recomendación automática de pérdida de peso puede ser inadecuada y hasta contraproducente.");
+      }
+      if(!safety.length){
+        safety.push("No se detectaron alertas mayores con los datos ingresados, pero la validación clínica sigue siendo obligatoria.");
+      }
+      document.getElementById("safetyBox").innerHTML = `<ul class="list-tight">` + safety.map(s=>`<li>${s}</li>`).join("") + `</ul>`;
+
+      const sex = document.getElementById("sex").value;
+      const positives = [
+        ["DM2 / insulinorresistencia", ctx.dm2],
+        ["ECV aterosclerótica / alto riesgo CV", ctx.ascvd],
+        ["Apnea obstructiva del sueño", ctx.osa],
+        ["ERC / albuminuria", ctx.ckd],
+        ["Reflujo / intolerancia GI", ctx.gerd],
+        ["Depresión / ansiedad", ctx.psych],
+        ["Migraña", ctx.migraine],
+        ["HTA / taquicardia", ctx.htn],
+        ["Nefrolitiasis o colelitiasis", ctx.stones],
+        ["Antecedente de pancreatitis", ctx.pancreatitis],
+        ["MEN2 / Ca medular tiroideo", ctx.medullary],
+        ["Necesidad de máxima pérdida ponderal", ctx.maxWeightLoss],
+        ["PFH anormales / esteatosis conocida", ctx.abnormalLFT]
+      ].filter(x=>x[1]).map(x=>x[0]);
+
+      const report = [
+        "INFORME CLÍNICO ORIENTATIVO | MASLD/MASH Navigator Pro",
+        "======================================================",
+        `Paciente: ${sex}, ${age} años`,
+        `Peso: ${fmt(weight,1)} kg | Talla: ${fmt(height,1)} cm | IMC: ${fmt(imc,1)} (${bmiClass(imc)})`,
+        `AST: ${fmt(ast,0)} | ALT: ${fmt(alt,0)} | Plaquetas: ${fmt(platelets,0)}`,
+        `FIB-4: ${fmt(fib4,2)} | Riesgo inicial: ${fibCat.label}`,
+        second ? `Segunda prueba: ${second.tier}${vcte!==null ? " | VCTE " + fmt(vcte,1) + " kPa" : ""}${elf!==null ? " | ELF " + fmt(elf,1) : ""}` : "Segunda prueba: no disponible",
+        pdff !== null ? `MRI-PDFF: ${fmt(pdff,1)}%` : "MRI-PDFF: no disponible",
+        "",
+        "COMORBILIDADES / FENOTIPOS ACTIVOS",
+        positives.length ? positives.map(x=>"- " + x).join("\n") : "- Ninguna marcada",
+        "",
+        "RUTA DIAGNÓSTICA SUGERIDA",
+        fibCat.label === "Bajo"
+          ? "- Riesgo bajo por FIB-4. En ausencia de señales de alarma, continuar manejo cardiometabólico y repetir FIB-4 en seguimiento."
+          : fibCat.label === "Intermedio"
+          ? "- Riesgo intermedio por FIB-4. Realizar elastografía o ELF para refinar estratificación."
+          : "- Riesgo alto por FIB-4. Considerar referencia a hepatología y completar evaluación.",
+        second ? `- Interpretación secundaria: ${second.tier}.` : "- Sin prueba secundaria.",
+        "",
+        "OBJETIVO DE PESO",
+        goals.type === "weight_loss"
+          ? `- Meta inicial sugerida: pérdida de ${goals.lowPct.toFixed(0)} a ${goals.highPct.toFixed(0)}% (${kg(weight - goals.lowWeight)} a ${kg(weight - goals.highWeight)}).`
+          : goals.type === "normal_weight"
+          ? "- IMC normal. No recomendar pérdida ponderal rutinaria. Priorizar composición corporal, adiposidad visceral, fuerza y riesgo metabólico."
+          : "- No promover pérdida de peso.",
+        goals.type === "weight_loss" ? `- Peso meta inicial aproximado: ${kg(goals.lowWeight)} a ${kg(goals.highWeight)}.` : "",
+        goals.type === "weight_loss" ? `- Referencia de peso para IMC 24.9: ${kg(goals.target249)}.` : "",
+        goals.outOfObesity ? `- Peso aproximado para IMC 29.9: ${kg(goals.outOfObesity)}.` : "",
+        "",
+        "TRATAMIENTO ORIENTATIVO",
+        `- Opción principal sugerida: ${drug.primary.name}.`,
+        `- Justificación: ${drug.primary.why}`,
+        drug.alternatives.length ? drug.alternatives.map(x=>"- " + x).join("\n") : "- Sin alternativas destacadas.",
+        "",
+        "ALERTAS",
+        safety.map(x=>"- " + x).join("\n"),
+        "",
+        "AVISO",
+        "Este informe es orientativo. Requiere integración con historia clínica, examen físico, otras etiologías hepáticas, disponibilidad local y juicio médico."
+      ].filter(Boolean).join("\n");
+
+      document.getElementById("reportBox").textContent = report;
+      window.currentReport = report;
+    }
+
+    function copyReport(){
+      const txt = document.getElementById("reportBox").textContent;
+      navigator.clipboard.writeText(txt).then(()=>alert("Informe copiado."));
+    }
+
+    function downloadReport(){
+      const txt = document.getElementById("reportBox").textContent || "Sin informe.";
+      const blob = new Blob([txt], {type:"text/plain;charset=utf-8"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "informe_masld_mash_obesidad.txt";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function resetForm(){
+      document.getElementById("age").value = 52;
+      document.getElementById("sex").value = "Mujer";
+      document.getElementById("weight").value = 98;
+      document.getElementById("height").value = 170;
+      document.getElementById("ast").value = 48;
+      document.getElementById("alt").value = 62;
+      document.getElementById("platelets").value = 230;
+      ["vcte","elf","pdff"].forEach(id => document.getElementById(id).value = "");
+      ["dm2","ascvd","osa","ckd","gerd","psych","migraine","htn","stones","pancreatitis","medullary","maxWeightLoss","abnormalLFT"]
+        .forEach(id => document.getElementById(id).checked = false);
+      document.getElementById("diagnosticFlow").textContent = "Ingresa datos y calcula.";
+      document.getElementById("weightPlan").textContent = "Se mostrará tras calcular.";
+      document.getElementById("drugRecommendation").textContent = "Sin recomendación todavía.";
+      document.getElementById("safetyBox").textContent = "Las alertas aparecerán aquí.";
+      document.getElementById("reportBox").textContent = "El informe aparecerá aquí.";
+      document.getElementById("globalBadge").className = "badge b-info";
+      document.getElementById("globalBadge").textContent = "Esperando cálculo";
+      ["imcValue","fib4Value","riskValue","targetValue"].forEach(id => document.getElementById(id).textContent = "--");
+      document.getElementById("imcClass").textContent = "Sin calcular";
+      document.getElementById("fib4Class").textContent = "Sin calcular";
+      document.getElementById("riskHint").textContent = "Ruta pendiente";
+      document.getElementById("targetHint").textContent = "Pendiente";
+    }
+
+    function loadExampleLean(){
+      resetForm();
+      document.getElementById("age").value = 46;
+      document.getElementById("sex").value = "Hombre";
+      document.getElementById("weight").value = 62;
+      document.getElementById("height").value = 176;
+      document.getElementById("ast").value = 42;
+      document.getElementById("alt").value = 55;
+      document.getElementById("platelets").value = 210;
+      document.getElementById("abnormalLFT").checked = true;
+      document.getElementById("vcte").value = 8.7;
+      runAlgorithm();
+    }
+
+    runAlgorithm();
   </script>
 </body>
 </html>
